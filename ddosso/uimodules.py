@@ -14,7 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .util import rooted_path
 import tornado.web
+import os
+
+
+class RootedPath(tornado.web.UIModule):
+
+    def render(self, path):
+        root = self.handler.component.conf['root']
+        return rooted_path(root, path)
 
 
 class PrintIfError(tornado.web.UIModule):

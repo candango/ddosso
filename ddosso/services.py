@@ -39,6 +39,19 @@ class UserService(service.FirenadoService):
             db_session.close()
         return user
 
+
+    def by_email(self, email, db_session=None):
+        self_session = False
+        if db_session is None:
+            db_session = self.get_data_source('diaspora').session
+            self_session = True
+        user = db_session.query(UserBase).filter(
+            UserBase.email == email).one_or_none()
+        if self_session:
+            db_session.close()
+        return user
+
+
     def is_password_valid(self, challenge, encrypted_password):
         return bcrypt.verify(
             self.get_peppered_password(challenge), encrypted_password)

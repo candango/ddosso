@@ -1,0 +1,8 @@
+{% if errors %}
+    {% if "signup" in errors %}
+    <div class="col-sm-offset-3 col-sm-6 alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      {{ errors['signup'] }}
+    </div>
+    {% end %}
+{% end %}

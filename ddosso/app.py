@@ -16,17 +16,29 @@
 
 from . import handlers
 from . import uimodules
+from .util import rooted_path
 import firenado.tornadoweb
 
 
 class DDOSSOComponent(firenado.tornadoweb.TornadoComponent):
 
     def get_handlers(self):
+        self.conf['social']['enabled'] = False
+        if (self.conf['social']['facebook']['enabled'] or
+                self.conf['social']['google']['enabled'] or
+                self.conf['social']['twitter']['enabled']):
+            self.conf['social']['enabled'] = True
         root = self.conf['root']
         return [
-            (r"/", handlers.IndexHandler),
-            (r"%ssso_login" % root, handlers.IndexHandler),
-            (r"%slogin" % root, handlers.LoginHandler),
+            (r"%s" % rooted_path(root, "/"), handlers.IndexHandler),
+            (r"%s" % rooted_path(root, "/sign_up"), handlers.SignupHandler),
+            (r"%s" % rooted_path(root, "google/sign_up"),
+             handlers.GoogleSignupHandler),
+            (r"%s" % rooted_path(root, "google/oauth2callback"),
+             handlers.GoogleLoginHandler),
+            (r"%s" % rooted_path(root, "discourse/sign_on"),
+             handlers.DiscourseSSOHandler),
+            (r"%s" % rooted_path(root, "discourse/login"), handlers.LoginHandler),
         ]
 
     def get_ui_modules(self):

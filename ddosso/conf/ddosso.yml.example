@@ -5,6 +5,8 @@ oauth:
     enabled: false
   google:
     enabled: false
+    key: "__TODO:_YOUR_GOOGLE_CLIENT_ID_HERE__"
+    secret: "__TODO:_YOUR_GOOGLE_CLIENT_SECRET_HERE__"
   twitter:
     enabled: false
 

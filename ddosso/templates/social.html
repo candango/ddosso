@@ -1,0 +1,48 @@
+{% if ddosso_conf['social']['enabled'] %}
+<div class="section-social-buttons">
+    <div class="row">
+        <div class="col-sm-offset-3 col-sm-6">
+            <div class="row">
+                {% if ddosso_conf['social']['google']['enabled'] %}
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social google" onclick="location.href='{{ modules.RootedPath("google/sign_up") }}'">
+                        <i class="fa fa-google-plus"></i> com Google
+                    </button>
+                </div>
+                {% end %}
+                {% if ddosso_conf['social']['facebook']['enabled'] %}
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social facebook">
+                        <i class="fa fa-facebook"></i> com Facebook
+                    </button>
+                </div>
+                {% end %}
+                {% if ddosso_conf['social']['twitter']['enabled'] %}
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social twitter">
+                        <i class="fa fa-twitter"></i> com Twitter
+                    </button>
+                </div>
+                {% end %}
+                {% if False %}
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social yahoo">
+                        <i class="fa fa-yahoo"></i> com Yahoo
+                    </button>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social github">
+                        <i class="fa fa-github"></i> com GitHub
+                    </button>
+                </div>
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social linkedin">
+                        <i class="fa fa-linkedin"></i> com LinkeIn
+                    </button>
+                </div>
+                {% end %}
+            </div>
+        </div>
+    </div>
+</div>
+{% end %}

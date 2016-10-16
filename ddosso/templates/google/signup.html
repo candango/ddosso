@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>SSO Register Page</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="login-logo text-center">
+            <img src="{{ ddosso_logo }}">
+        </div>
+        <div class="login-box">
+            <div class="box-header">
+                <div class="row">
+                    <div class="col-sm-offset-3 col-sm-6">
+                        <h1>Criar nova conta</h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-body">
+                <div class="text-center">
+                    <img src="{{ google_user['picture'] }}">
+                </div>
+                <div class="text-center">
+                    <b>E-Mail:</b> {{ google_user['email'] }}
+                </div>
+                <div class="section-social-buttons">
+                    <div class="row">
+                        <div class="col-sm-offset-5 col-sm-6">
+                            <div class="row">
+                                <div class="col-sm-6 col-lg-4">
+                                    <button class="btn btn-block btn-social google">
+                                        <i class="fa fa-google-plus"></i> com Google
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-form">
+                    <div class="row">
+                        <div class="col-sm-offset-3 col-sm-6">
+                            <div class="login-form">
+                                <form class="form-horizontal">
+
+                                    <div class="form-group">
+                                        <label for="login-user" class="col-sm-2 control-label">Usuário</label>
+                                        <div class="col-sm-10">
+                                            <input id="login-user" type="text" class="form-control" placeholder="Usuário no TheRealTalk" autofocus>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="login-pwd" class="col-sm-2 control-label">Senha</label>
+                                        <div class="col-sm-10">
+                                            <input id="login-pwd" type="password" class="form-control" placeholder="Senha no TheRealTalk">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="login-pwd-confirm" class="col-sm-2 control-label">Confirmar Senha</label>
+                                        <div class="col-sm-10">
+                                            <input id="login-pwd-confirm" type="password" class="form-control" placeholder="Confirme a senha do TheRealTalk">
+                                        </div>
+                                    </div>
+                                    <div class="form-group form-btns">
+                                        <div class="col-sm-offset-2 col-sm-10">
+                                            <button class="btn btn-login">Criar Nova Conta</button>
+                                            <a href="#" class="link-register">Entrar com uma conta existente</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

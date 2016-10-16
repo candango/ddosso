@@ -1,5 +1,5 @@
 ujson>=1.35
-firenado[redis, sqlalchemy]==0.1.5.2
+firenado[redis, sqlalchemy]==0.1.5.3
 pymysql==0.7.3
 psycopg2==2.6.1
 passlib==1.6.5
