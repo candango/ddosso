@@ -13,46 +13,10 @@
                     </div>
                 </div>
             </div>
+            {% include "sign_up_errors.html" %}
             {% if False %}
             <div class="box-body">
-                <div class="section-social-buttons">
-                    <div class="row">
-                        <div class="col-sm-offset-3 col-sm-6">
-                            <div class="row">
-                                <div class="col-sm-6 col-lg-4">
-                                    <button class="btn btn-block btn-social google">
-                                        <i class="fa fa-google-plus"></i> com Google
-                                    </button>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    <button class="btn btn-block btn-social facebook">
-                                        <i class="fa fa-facebook"></i> com Facebook
-                                    </button>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    <button class="btn btn-block btn-social twitter">
-                                        <i class="fa fa-twitter"></i> com Twitter
-                                    </button>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    <button class="btn btn-block btn-social yahoo">
-                                        <i class="fa fa-yahoo"></i> com Yahoo
-                                    </button>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    <button class="btn btn-block btn-social github">
-                                        <i class="fa fa-github"></i> com GitHub
-                                    </button>
-                                </div>
-                                <div class="col-sm-6 col-lg-4">
-                                    <button class="btn btn-block btn-social linkedin">
-                                        <i class="fa fa-linkedin"></i> com LinkeIn
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {% include "social.html" %}
                 {% end %}
                 <div class="section-form">
                     <div class="row">

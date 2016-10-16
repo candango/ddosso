@@ -96,5 +96,8 @@ firenado.yml
 ddosso.yml
 static_maps.yml
 
+# Supervisord
+firenado.ddosso.supervisord.ini
+
 # PyCharm
 .idea
