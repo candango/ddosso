@@ -28,6 +28,10 @@ maps:
       path: "dist"
       map_on_path: true
       name_on_path: true
+    - name: "jquery-cookie"
+      handler: "/vendor/jquery-cookie/(.*)"
+      map_on_path: true
+      name_on_path: true
     - name: "i18next"
       handler: "/vendor/i18next/(.*)"
       map_on_path: true

@@ -1,12 +1,12 @@
 $(document).ready(function () {
     var location_root = document.location.pathname.replace("sign_up", "");
-    console.debug( "GET " + location_root + "captcha/{id}");
+
     SignupModel = can.Model.extend({
         findOne: "GET " + location_root + "captcha/{id}",
         create : "POST " + location_root + "sign_up"
     },{});
 
-    var SignupForm = can.Component.extend({
+    can.Component.extend({
         tag: "sign-up-form",
         template: can.view("#sign_up_form"),
         viewModel:{
@@ -101,8 +101,7 @@ $(document).ready(function () {
                     var form = this.element.find('form');
                     var values = can.deparam(form.serialize());
                     var parameters = [];
-                    values._xsrf = getCookie('_xsrf');
-
+                    values._xsrf = $.cookie('_xsrf');
                     this.viewModel.signup.attr(values).save(
                         this.viewModel.processLogin.bind(this),
                         this.viewModel.processLoginError.bind(this)
@@ -117,8 +116,6 @@ $(document).ready(function () {
             }
         }
     });
-
-    can.extend(SignupForm.prototype, can.event);
 
     $("#ddosso_sign_up_form").html(can.stache("<sign-up-form></sign-up-form>")());
 });

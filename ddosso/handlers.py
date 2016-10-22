@@ -31,12 +31,9 @@ import functools
 import hashlib
 import hmac
 
-import io
-import os
-
 from tornado.auth import GoogleOAuth2Mixin
 import tornado.escape
-from tornado.web import HTTPError, MissingArgumentError
+from tornado.web import MissingArgumentError
 from tornado import gen
 
 import urllib.parse
