@@ -101,7 +101,7 @@ $(document).ready(function () {
                     var form = this.element.find('form');
                     var values = can.deparam(form.serialize());
                     var parameters = [];
-                    values._xsrf = Cookies.get('_xsrf');
+                    values._xsrf = get_xsrf();
                     this.viewModel.signup.attr(values).save(
                         this.viewModel.processLogin.bind(this),
                         this.viewModel.processLoginError.bind(this)

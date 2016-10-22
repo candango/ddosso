@@ -11,6 +11,11 @@
     <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" >
     <link rel="stylesheet" href="/vendor/font-awesome/css/font-awesome.min.css" >
     <link rel="stylesheet" href="{{ modules.RootedPath("static/style.css") }}">
+    <script language="JavaScript">
+        function get_xsrf() {
+            return "{{ escape(handler.xsrf_token) }}";
+        }
+    </script>
 </head>
 
 <body>
