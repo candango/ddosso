@@ -91,7 +91,7 @@ class SgninHandler(firenado.tornadoweb.TornadoHandler):
                     ddosso_logo=ddosso_logo, errors=errors)
 
 
-class SignupHandler(firenado.tornadoweb.TornadoHandler):
+class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
 
     def get(self):
         errors = None
@@ -106,15 +106,14 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler):
         error_data = {'errors': {}}
         form = SignupForm(self.request.arguments, handler=self)
         if form.validate():
-            print("GOOD")
+            self.set_status(200)
+            data = {'id': "abcd1234",
+                    'next_url': self.get_rooted_path("profile")}
+            self.write(data)
         else:
             self.set_status(403)
             error_data['errors'].update(form.errors)
             self.write(error_data)
-
-
-
-        print(error_data)
 
 
 class GoogleSignupHandler(GoogleHandlerMixin,

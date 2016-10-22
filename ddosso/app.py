@@ -49,3 +49,20 @@ class DDOSSOComponent(firenado.tornadoweb.TornadoComponent):
 
     def get_config_file(self):
         return "ddosso"
+
+    def install(self):
+        from sqlalchemy import text
+        from firenado.util.sqlalchemy_util import Base
+        from .diaspora.models import DddossoUserBase
+        print('Installing DDOSSO...')
+        print('Creating DDOSSO users table ...')
+        engine = self.application.get_data_source(
+            'diaspora').engine
+        engine.echo = False
+        # Dropping all
+        # TODO Not to drop all if something is installed right?
+
+        DddossoUserBase.__table__.drop(engine, checkfirst=True)
+        # Creating database
+        DddossoUserBase.__table__.create(engine)
+        engine.dispose()

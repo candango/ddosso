@@ -20,7 +20,8 @@ from wtforms import ValidationError
 from wtforms.fields import StringField, PasswordField
 from wtforms.validators import DataRequired, Email
 from wtforms_tornado import Form
-
+SIGNUP_FORM_CAPTCHA_MISSING = ("Informe o valor da imagem.")
+SIGNUP_FORM_CAPTCHA_NOT_MATCH = ("O valor informado não é igual o da imagem.")
 SIGNUP_FORM_EMAIL_INVALID = "Informe um email válido."
 SIGNUP_FORM_EMAIL_EXISTS = "Este email já está cadastrado."
 SIGNUP_FORM_PASSWORD_MISSING = "Informe uma senha."
@@ -41,6 +42,8 @@ class SignupForm(Form):
         SIGNUP_FORM_PASSWORD_CONF_MISSING)])
     username = StringField(validators=[DataRequired(
         SIGNUP_FORM_USERNAME_MISSING)])
+    captcha = StringField(validators=[DataRequired(
+        SIGNUP_FORM_CAPTCHA_MISSING)])
 
     def __init__(self, formdata=None, obj=None, prefix='', locale_code='en_US',
                  handler=None,
@@ -66,6 +69,11 @@ class SignupForm(Form):
         if self.password.data:
             if self.password.data != field.data:
                 raise ValidationError(SIGNUP_FORM_PASSWORD_CONF_NOT_MATCH)
+
+    def validate_captcha(self, field):
+        print(self.handler.session.get("captcha_string_sign_up"))
+        if field.data != self.handler.session.get("captcha_string_sign_up"):
+            raise ValidationError(SIGNUP_FORM_CAPTCHA_NOT_MATCH)
 
     def get_data_connected(self):
         if self.handler:

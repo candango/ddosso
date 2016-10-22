@@ -39,8 +39,9 @@
                     </div>
                 </div>
                 <div class="form-group {{#hasCaptchaError}}has-error{{/hasCaptchaError}}">
-                    <div class="col-sm-4">
+                    <div class="col-sm-4 text-center">
                         <img src="{{{captchaData}}}">
+                        <a id="refresh_captcha" class="link-register" class="link-register">Nova Imagem</a>
                     </div>
                     <div class="col-sm-8">
                         <input name="captcha" id="signup_captcha" type="text" class="form-control" placeholder="Infome o valor da imagem.">

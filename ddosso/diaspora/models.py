@@ -970,3 +970,24 @@ Index('idx_users_username', UserBase.username, unique=True,
 Index('idx_users_email', UserBase.email, postgresql_using='btree')
 Index('idx_users_invitation_token', UserBase.authentication_token,
       postgresql_using='btree')
+
+
+class DddossoUserBase(Base):
+
+    __tablename__ = 'ddosso_users'
+
+    id = Column('id', Integer(), primary_key=True)
+    facebook_handler = Column('facebook_handler', String(255),
+                              DefaultClause(''), nullable=True)
+    facebook_data = Column('facebook_data', Text, nullable=True)
+    gmail_handler = Column('gmail_handler', String(255), DefaultClause(''),
+                           nullable=True)
+    gmail_data = Column('gmail_data', Text, nullable=True)
+    twitter_handler = Column('twitter_handler', String(255), DefaultClause(''),
+                             nullable=True)
+    twitter_data = Column('twitter_data', Text, nullable=True)
+    created_at = Column('created_at', TIMESTAMP(), nullable=False)
+    updated_at = Column('updated_at', TIMESTAMP(), nullable=False)
+
+Index('idx_ddosso_users_facebook_handler', DddossoUserBase.facebook_handler,
+      postgresql_using='btree')

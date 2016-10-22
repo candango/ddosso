@@ -40,6 +40,10 @@ $(document).ready(function () {
                 $("#signup_captcha").val("")
                 var errors = response.responseJSON.errors;
                 var errorMessage = '';
+                if(errors.hasOwnProperty('captcha')) {
+                    this.viewModel.attr("hasCaptchaError", true);
+                    this.viewModel.attr("captchaError", errors.captcha);
+                }
                 if(errors.hasOwnProperty('email')) {
                     this.viewModel.attr("hasEmailError", true);
                     this.viewModel.attr("emailError", errors.email);
@@ -55,8 +59,7 @@ $(document).ready(function () {
                 }
                 if(errors.hasOwnProperty('username')) {
                     this.viewModel.attr("hasUsernameError", true);
-                    this.viewModel.attr("usernameError",
-                        this.viewModel.attr("CAPTCHA_IS_EMPTY"));
+                    this.viewModel.attr("usernameError", errors.username);
                 }
                 var errors = new can.Map(response.responseJSON.errors);
                 errors.each(
@@ -70,12 +73,6 @@ $(document).ready(function () {
                 this.viewModel.attr('errorMessage', errorMessage);
                 this.viewModel.refreshCaptcha();
             }
-        },
-        init: function() {
-            this.on(document, 'ready', function (ev) {
-
-            });
-            /**/
         },
         events: {
             "inserted": function () {
@@ -111,6 +108,9 @@ $(document).ready(function () {
                         this.viewModel.processLoginError.bind(this)
                     );
                 }
+            },
+            "#refresh_captcha click": function(event) {
+                this.viewModel.refreshCaptcha();
             },
             "#login_form submit": function(event) {
                 return false;
