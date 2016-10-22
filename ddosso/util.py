@@ -21,7 +21,7 @@ def captcha_data(handler, name):
     from firenado.util import random_string
     image = ImageCaptcha(fonts=[
         "/usr/share/fonts/dejavu/DejaVuSans.ttf",
-        "/usr/share/calibre/fonts/liberation/LiberationSerif-Regular.ttf"]
+        "/usr/share/fonts/liberation/LiberationSerif-Regular.ttf"]
     )
     string = random_string(5)
     anti_cache = random_string(22)

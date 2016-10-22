@@ -3,9 +3,11 @@
 
 ## Introduction
 
-Single Sing-On for Discourse and Diaspora with Facebook, Twitter, and Gmail
-authentication.
+Single Sing-On for Discourse and Diaspora with Facebook, Twitter, and
+Gmail authentication.
 
 ## Requirements
 
-libjpeg-turbo-devel
+```shell
+yum install libjpeg-turbo-devel freetype-devel libXft-devel dejavu-sans-fonts liberation-serif-fonts
+```
