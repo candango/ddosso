@@ -31,6 +31,7 @@ class DDOSSOComponent(firenado.tornadoweb.TornadoComponent):
         root = self.conf['root']
         return [
             (r"%s" % rooted_path(root, "/"), handlers.IndexHandler),
+            (r"%s" % rooted_path(root, "/sign_in"), handlers.SgninHandler),
             (r"%s" % rooted_path(root, "/sign_up"), handlers.SignupHandler),
             (r"%s" % rooted_path(root, "google/sign_up"),
              handlers.GoogleSignupHandler),
@@ -38,7 +39,8 @@ class DDOSSOComponent(firenado.tornadoweb.TornadoComponent):
              handlers.GoogleLoginHandler),
             (r"%s" % rooted_path(root, "discourse/sign_on"),
              handlers.DiscourseSSOHandler),
-            (r"%s" % rooted_path(root, "discourse/login"), handlers.LoginHandler),
+            (r"%s" % rooted_path(root, "discourse/login"),
+             handlers.LoginHandler),
         ]
 
     def get_ui_modules(self):

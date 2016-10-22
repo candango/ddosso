@@ -16,7 +16,13 @@
 
 from .util import rooted_path
 import tornado.web
+from firenado.util import file as _file
+import firenado.conf
+#import logging
 import os
+import htmlmin
+#from css_html_js_minify.minify import prepare
+#from css_html_js_minify import html_minify
 
 
 class RootedPath(tornado.web.UIModule):
@@ -24,6 +30,26 @@ class RootedPath(tornado.web.UIModule):
     def render(self, path):
         root = self.handler.component.conf['root']
         return rooted_path(root, path)
+
+
+class EmbedStache(tornado.web.UIModule):
+
+    def render(self, embeded_id, embeded_path, component=None):
+        # This is to fix the issue with the css_html_js_minify
+        # https://github.com/juancarlospaco/css-html-js-minify/issues/43
+        #prepare()
+        # TODO: MOVE THIS TO FIRENADO. GREAT UI MODULE!!!
+        if component is None:
+            component = firenado.conf.app['component']
+        component_path = self.handler.application.components[
+            component].get_component_path()
+        # TODO: check if this path exists
+        content = htmlmin.minify(_file.read(os.path.join(
+            component_path, "static", "stache", embeded_path)))
+        template = "ddosso:uimodules/embeded_stache.html"
+        embeded = self.render_string(template, embeded_id=embeded_id,
+                                     embeded_content=content)
+        return embeded.decode("utf-8")
 
 
 class PrintIfError(tornado.web.UIModule):

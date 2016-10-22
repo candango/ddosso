@@ -7,3 +7,32 @@ maps:
       path: "static"
       map_on_path: false
       name_on_path: false
+  - name: bower_components
+    #root: .
+    handlers:
+    - name: "bootstrap"
+      handler: "/vendor/bootstrap/(.*)"
+      path: "dist"
+      map_on_path: true
+      name_on_path: true
+    - name: "canjs"
+      handler: "/vendor/canjs/(.*)"
+      map_on_path: true
+      name_on_path: true
+    - name: "font-awesome"
+      handler: "/vendor/font-awesome/(.*)"
+      map_on_path: true
+      name_on_path: true
+    - name: "jquery"
+      handler: "/vendor/jquery/(.*)"
+      path: "dist"
+      map_on_path: true
+      name_on_path: true
+    - name: "i18next"
+      handler: "/vendor/i18next/(.*)"
+      map_on_path: true
+      name_on_path: true
+    - name: "steal"
+      handler: "/vendor/steal/(.*)"
+      map_on_path: true
+      name_on_path: true

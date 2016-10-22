@@ -51,7 +51,13 @@ class GoogleHandlerMixin:
         return tornado.escape.json_decode(user_json)
 
 
-class IndexHandler(firenado.tornadoweb.TornadoHandler):
+class IndexHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+
+    def get(self):
+        self.redirect(self.get_rooted_path("/sign_in"), permanent=True)
+
+
+class SgninHandler(firenado.tornadoweb.TornadoHandler):
 
     def get(self):
         errors = None
@@ -59,7 +65,7 @@ class IndexHandler(firenado.tornadoweb.TornadoHandler):
             errors = self.session.get('errors')
             self.session.delete('errors')
         ddosso_logo = self.component.conf['logo']
-        self.render("index.html", ddosso_conf=self.component.conf,
+        self.render("sign_in.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors)
 
 

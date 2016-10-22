@@ -14,15 +14,13 @@
                 </div>
             </div>
             {% include "sign_up_errors.html" %}
-            {% if False %}
             <div class="box-body">
                 {% include "social.html" %}
-                {% end %}
                 <div class="section-form">
                     <div class="row">
                         <div class="col-sm-offset-3 col-sm-6">
-                            <div class="login-form  {% module PrintIfError("fail", "has-error") %}">
-                                <form class="form-horizontal" action="login" method="post">
+                            <div class="login-form {% module PrintIfError("fail", "has-error") %}">
+                                <form class="form-horizontal" action="{{ modules.RootedPath("/login") }}" method="post">
                                     {% module xsrf_form_html() %}
                                     <div class="form-group">
                                         <label for="login-user" class="col-sm-2 control-label">Usuário</label>
@@ -44,7 +42,7 @@
                                     <div class="form-group form-btns">
                                         <div class="col-sm-offset-2 col-sm-10">
                                             <button class="btn btn-login" type="submit">Entrar</button>
-                                            <a href="{{ ddosso_conf['diaspora']['url'] }}/users/sign_up" target="_blank" class="link-register">Criar uma conta</a>
+                                            <a href="{{ modules.RootedPath("/sign_up") }}" target="_blank" class="link-register">Criar uma conta</a>
                                         </div>
                                     </div>
                                 </form>

@@ -1,0 +1,38 @@
+<div class="row">
+    <div class="col-sm-offset-3 col-sm-6">
+        <div class="login-form">
+            <form id="login_form" class="form-horizontal">
+                <div class="form-group">
+                    <label for="user-email" class="col-sm-2 control-label">E-Mail</label>
+                    <div class="col-sm-10">
+                        <input name="user-email" id="user-email" type="text" class="form-control" placeholder="Informe seu email" autofocus>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-user" class="col-sm-2 control-label">Usuário</label>
+                    <div class="col-sm-10">
+                        <input name="login-user" id="login-user" type="text" class="form-control" placeholder="Usuário no TheRealTalk" autofocus>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-pwd" class="col-sm-2 control-label">Senha</label>
+                    <div class="col-sm-10">
+                        <input name="login-pwd" id="login-pwd" type="password" class="form-control" placeholder="Senha no TheRealTalk">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-pwd-confirm" class="col-sm-2 control-label">Confirmar Senha</label>
+                    <div class="col-sm-10">
+                        <input name="login-pwd-confirm" id="login-pwd-confirm" type="password" class="form-control" placeholder="Confirme a senha do TheRealTalk">
+                    </div>
+                </div>
+                <div class="form-group form-btns">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button id="login_button" class="btn btn-login">Criar Nova Conta</button>
+                        <a class="link-register" class="link-register">Entrar com uma conta existente</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

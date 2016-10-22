@@ -1,7 +1,12 @@
 ujson>=1.35
 firenado[redis, sqlalchemy]==0.1.5.3
-pymysql==0.7.3
 psycopg2==2.6.1
 passlib==1.6.5
 pycrypto==2.6.1
 bcrypt==2.0.0
+WTForms-Tornado==0.0.2
+WTForms-JSON == 0.2.10
+jsonschema==2.5.1
+# TOO Intrusive logger
+#css_html_js_minify==2.2.2
+htmlmin==0.1.10
