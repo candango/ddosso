@@ -17,22 +17,44 @@
 # See: http://bit.ly/2cj7IRS
 
 from . import discourse
-from .util import rooted_path
+from .forms import SignupForm
+from .util import captcha_data, rooted_path
 import base64
 
+import firenado.conf
 import firenado.tornadoweb
 import firenado.security
 from firenado import service
 
+import functools
+
 import hashlib
 import hmac
 
+import io
+import os
+
 from tornado.auth import GoogleOAuth2Mixin
 import tornado.escape
-from tornado.web import MissingArgumentError
+from tornado.web import HTTPError, MissingArgumentError
 from tornado import gen
 
 import urllib.parse
+
+
+def only_ajax(method):
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if "X-Requested-With" in self.request.headers:
+            if self.request.headers['X-Requested-With'] == "XMLHttpRequest":
+                return method(self, *args, **kwargs)
+
+        else:
+            self.set_status(403)
+            self.write("This is an XMLHttpRequest request only.")
+
+    return wrapper
 
 
 class RootedHandlerMixin:
@@ -80,6 +102,20 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler):
         self.render("sign_up.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors)
 
+    def post(self):
+        error_data = {'errors': {}}
+        form = SignupForm(self.request.arguments, handler=self)
+        if form.validate():
+            print("GOOD")
+        else:
+            self.set_status(403)
+            error_data['errors'].update(form.errors)
+            self.write(error_data)
+
+
+
+        print(error_data)
+
 
 class GoogleSignupHandler(GoogleHandlerMixin,
                           firenado.tornadoweb.TornadoHandler):
@@ -96,8 +132,6 @@ class GoogleSignupHandler(GoogleHandlerMixin,
                                 "Google.")
             self.session.set("errors", errors)
             self.redirect("%s" % self.component.conf['root'])
-
-
         ddosso_logo = self.component.conf['logo']
         self.render("google_signup.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors,
@@ -238,3 +272,16 @@ class LoginHandler(firenado.tornadoweb.TornadoHandler):
             {'sso': return_payload, 'sig': h.hexdigest()})
         return_path = '%s?%s' % (return_sso_url, query_string)
         self.redirect(return_path)
+
+
+class CaptchaHandler(firenado.tornadoweb.TornadoHandler):
+
+    @only_ajax
+    def get(self, name):
+        import base64
+        data = {
+            "id": name,
+            "captcha": "data:image/png;base64,%s" %
+                       base64.b64encode(captcha_data(self, name)).decode()
+        }
+        self.write(data)

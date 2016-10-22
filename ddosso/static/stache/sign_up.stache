@@ -2,28 +2,51 @@
     <div class="col-sm-offset-3 col-sm-6">
         <div class="login-form">
             <form id="login_form" class="form-horizontal">
-                <div class="form-group">
+                <div class="form-group {{#hasEmailError}}has-error{{/hasEmailError}}">
                     <label for="user-email" class="col-sm-2 control-label">E-Mail</label>
                     <div class="col-sm-10">
-                        <input name="user-email" id="user-email" type="text" class="form-control" placeholder="Informe seu email" autofocus>
+                        <input name="email" id="user-email" type="text" class="form-control" placeholder="Informe seu email" autofocus>
+                        {{#hasEmailError}}
+                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{emailError}}}</span>
+                        {{/hasEmailError}}
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group {{#hasUsernameError}}has-error{{/hasUsernameError}}">
                     <label for="login-user" class="col-sm-2 control-label">Usuário</label>
                     <div class="col-sm-10">
-                        <input name="login-user" id="login-user" type="text" class="form-control" placeholder="Usuário no TheRealTalk" autofocus>
+                        <input name="username" id="login-user" type="text" class="form-control" placeholder="Usuário no TheRealTalk" autofocus>
+                        {{#hasUsernameError}}
+                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{usernameError}}}</span>
+                        {{/hasUsernameError}}
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group {{#hasPasswordError}}has-error{{/hasPasswordError}}">
                     <label for="login-pwd" class="col-sm-2 control-label">Senha</label>
                     <div class="col-sm-10">
-                        <input name="login-pwd" id="login-pwd" type="password" class="form-control" placeholder="Senha no TheRealTalk">
+                        <input name="password" id="login-pwd" type="password" class="form-control" placeholder="Senha no TheRealTalk">
+                        {{#hasPasswordError}}
+                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{passwordError}}}</span>
+                        {{/hasPasswordError}}
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group {{#hasPasswordConfError}}has-error{{/hasPasswordConfError}}">
                     <label for="login-pwd-confirm" class="col-sm-2 control-label">Confirmar Senha</label>
                     <div class="col-sm-10">
-                        <input name="login-pwd-confirm" id="login-pwd-confirm" type="password" class="form-control" placeholder="Confirme a senha do TheRealTalk">
+                        <input name="passwordConf" id="login-pwd-confirm" type="password" class="form-control" placeholder="Confirme a senha do TheRealTalk">
+                        {{#hasPasswordConfError}}
+                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{passwordConfError}}}</span>
+                        {{/hasPasswordConfError}}
+                    </div>
+                </div>
+                <div class="form-group {{#hasCaptchaError}}has-error{{/hasCaptchaError}}">
+                    <div class="col-sm-4">
+                        <img src="{{{captchaData}}}">
+                    </div>
+                    <div class="col-sm-8">
+                        <input name="captcha" id="signup_captcha" type="text" class="form-control" placeholder="Infome o valor da imagem.">
+                        {{#hasCaptchaError}}
+                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{captchaError}}}</span>
+                        {{/hasCaptchaError}}
                     </div>
                 </div>
                 <div class="form-group form-btns">

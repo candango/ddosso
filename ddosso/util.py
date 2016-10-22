@@ -15,6 +15,21 @@
 # limitations under the License.
 
 
+def captcha_data(handler, name):
+    from captcha.image import ImageCaptcha
+    from PIL import Image
+    from firenado.util import random_string
+    image = ImageCaptcha(fonts=[
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+        "/usr/share/calibre/fonts/liberation/LiberationSerif-Regular.ttf"]
+    )
+    string = random_string(5)
+    anti_cache = random_string(22)
+    handler.session.set("captcha_string%s" % name, string)
+    data = image.generate(string)
+    return data.getvalue()
+
+
 def rooted_path(root, path):
     if root[-1] != "/":
         root = "%s/" % root
@@ -22,3 +37,5 @@ def rooted_path(root, path):
     if rooted_path == "/":
         return rooted_path
     return rooted_path.rstrip("/")
+
+

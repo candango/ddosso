@@ -31,6 +31,7 @@ class DDOSSOComponent(firenado.tornadoweb.TornadoComponent):
         root = self.conf['root']
         return [
             (r"%s" % rooted_path(root, "/"), handlers.IndexHandler),
+            (r"%s" % rooted_path(root, "/captcha/(.*)"), handlers.CaptchaHandler),
             (r"%s" % rooted_path(root, "/sign_in"), handlers.SgninHandler),
             (r"%s" % rooted_path(root, "/sign_up"), handlers.SignupHandler),
             (r"%s" % rooted_path(root, "google/sign_up"),
