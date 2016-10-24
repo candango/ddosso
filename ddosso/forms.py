@@ -71,7 +71,6 @@ class SignupForm(Form):
                 raise ValidationError(SIGNUP_FORM_PASSWORD_CONF_NOT_MATCH)
 
     def validate_captcha(self, field):
-        print(self.handler.session.get("captcha_string_sign_up"))
         if field.data != self.handler.session.get("captcha_string_sign_up"):
             raise ValidationError(SIGNUP_FORM_CAPTCHA_NOT_MATCH)
 

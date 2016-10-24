@@ -17,11 +17,12 @@
 from datetime import datetime
 from firenado import service
 from firenado.config import load_yaml_config_file
-from .diaspora.models import PersonBase, ProfileBase, UserBase
+from .diaspora.models import AspectBase, PersonBase, ProfileBase, UserBase
 import logging
 from passlib.hash import bcrypt
 import os
 import sys
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,72 @@ class UserService(service.FirenadoService):
             db_session.close()
         return user
 
+    def create(self, user_data, created_utc=None, db_session=None):
+        from .util import generate_private_key
+        from firenado.util import random_string
+        if not created_utc:
+            created_utc = datetime.utcnow()
+        remote_ip = None
+        if "remote_ip" in user_data:
+            remote_ip = user_data['remote_ip']
+        user = UserBase()
+        user.username = user_data['username']
+        # TODO: Generate the serialized private key
+        user.serialized_private_key = generate_private_key()
+        user.getting_started = True
+        user.disable_mail = False
+        # TODO: Handle language
+        user.language = 'en'
+        user.email = user_data['email']
+        # TODO: encrypt the password
+        user.encrypted_password = bcrypt.encrypt(
+            self.get_peppered_password(user_data['password']))
+        # Not used
+        user.invitation_token = None
+        user.invitation_sent_at = None
+        user.reset_password_sent_at = None
+        user.sign_in_count = 1
+        user.current_sign_in_at = created_utc
+        user.last_sign_in_at = created_utc
+        user.current_sign_in_ip = remote_ip
+        user.last_sign_in_ip = remote_ip
+        user.created_at = created_utc
+        user.updated_at = created_utc
+        user.invited_by_id = None
+        user.authentication_token = None
+        user.unconfirmed_email = None
+        user.confirm_email_token = None
+        user.locked_at = None
+        # TODO: This should be set based on an application settings
+        user.show_community_spotlight_in_stream = True
+        user.auto_follow_back = False
+        user.auto_follow_back_aspect_id = None
+        user.hidden_shareables = None
+        user.reset_password_sent_at = created_utc
+        user.last_seen = None
+        user.remove_after = None
+        user.export = "%s_diaspora_data_%s.json.gz" % (
+            user_data['username'], random_string(22))
+        user.exported_at = None
+        user.exporting = False
+        user.strip_exif = True
+        user.exported_photos_file = None
+        user.exported_photos_at = None
+        user.exporting_photos = False
+        user.color_theme = "original"
+
+        commit = False
+        if not db_session:
+            db_session = self.get_data_source(
+                "diaspora").session
+            commit = True
+        db_session.add(user)
+        if commit:
+            db_session.commit()
+            db_session.close()
+        logger.info("Created user: %s" % user)
+        return user
+
 
     def is_password_valid(self, challenge, encrypted_password):
         return bcrypt.verify(
@@ -63,7 +130,6 @@ class UserService(service.FirenadoService):
             right_now = datetime.now()
             last_sign_in_at = user.current_sign_in_at
             last_sign_in_ip = user.current_sign_in_ip
-
             user.sign_in_count += 1
             user.current_sign_in_at = right_now
             user.last_sign_in_at = last_sign_in_at
@@ -73,7 +139,7 @@ class UserService(service.FirenadoService):
             db_session.commit()
         except:
             db_session.rollback()
-            logger.error("Unexpected error: %s" % sys.exc_info()[0])
+            logger.info("Unexpected error: %s" % sys.exc_info()[0])
         finally:
             db_session.close()
 
@@ -92,6 +158,62 @@ class PersonService(service.FirenadoService):
             PersonBase.owner_id == user.id).one_or_none()
         db_session.close()
 
+    def create(self, person_data, created_utc=None, db_session=None):
+        from .util import generate_public_key
+        if not created_utc:
+            created_utc = datetime.utcnow()
+
+        person = PersonBase()
+        # TODO: It looks like the guid should be generated based on a random
+        # string. This generation based on the timestamp is not correct and
+        # should be fixed.
+        person.guid = str(uuid.uuid5(uuid.NAMESPACE_URL, str(created_utc)))
+        person.diaspora_handle = "%s@%s" % (person_data['user'].username,
+                                            person_data['pod'])
+        person.serialized_public_key = generate_public_key(
+            person_data['user'].serialized_private_key)
+        person.owner_id = person_data['user'].id
+        person.created_at = created_utc
+        person.updated_at = created_utc
+        person.closed_account = False
+        person.fetch_status = 0
+        commit = False
+        if not db_session:
+            session = self.get_data_source(
+                    'diasporapy').get_connection()['session']
+            commit = True
+        db_session.add(person)
+        if commit:
+            db_session.commit()
+            db_session.close()
+        logger.info("Created person: %s" % person)
+        return person
+
+
+
+class AspectService(service.FirenadoService):
+
+    def create(self, aspect_data, db_session=None):
+        created_utc = datetime.utcnow()
+        aspect = AspectBase()
+        aspect.name = aspect_data['name']
+        aspect.user_id = aspect_data['user'].id
+        aspect.created_at = created_utc
+        aspect.updated_at = created_utc
+        aspect.contacts_visible = True
+        aspect.order_id = aspect_data['order_id']
+
+        commit = False
+        if not db_session:
+            db_session = self.get_data_source('diaspora').session
+            commit = True
+        db_session.add(aspect)
+        if commit:
+            db_session.commit()
+            db_session.close()
+        logger.info("Created aspect: %s" % aspect)
+        return aspect
+
 
 class ProfileService(service.FirenadoService):
 
@@ -100,6 +222,56 @@ class ProfileService(service.FirenadoService):
         return db_session.query(ProfileBase).filter(
             ProfileBase.person_id == person.id).one_or_none()
         db_session.close()
+
+    def create(self, profile_data, created_utc=None, db_session=None):
+        """
+
+        :param person:
+        :param first_name:
+        :param last_name:
+        :return:
+        """
+        if not created_utc:
+            created_utc = datetime.utcnow()
+
+        first_name = None
+        last_name = None
+        if 'first_name' in profile_data:
+            first_name = profile_data['first_name']
+        if 'last_name' in profile_data:
+            last_name = profile_data['last_name']
+
+        profile = ProfileBase()
+
+        profile.first_name = first_name
+        profile.last_name = last_name
+        profile.image_url = ''
+        profile.image_url_small = ''
+        profile.image_url_medium = ''
+        profile.birthday = None
+        profile.gender = ''
+        profile.bio = ''
+        profile.searchable = True
+        # TODO: this should be filled at the beginning
+        profile.person_id = profile_data['person'].id
+        profile.created_at = created_utc
+        profile.updated_at = created_utc
+        profile.location = ''
+        profile.full_name = ''
+        profile.nsfw = False
+        profile.public_details = False
+
+        commit = False
+        if not db_session:
+            db_session = self.get_data_source(
+                    'diasporapy').get_connection()['session']
+            commit = True
+        db_session.add(profile)
+        if commit:
+            db_session.commit()
+            db_session.close()
+        logger.info("Created profile: %s" % profile)
+        return profile
 
 
 class LoginService(service.FirenadoService):
@@ -157,4 +329,58 @@ class LoginService(service.FirenadoService):
                 user_data['name'] = user_name.title()
                 user_data['avatar'] = profile.image_url_medium
                 return user_data
+        return False
+
+
+class AccountService(service.FirenadoService):
+
+    @service.served_by(UserService)
+    @service.served_by(PersonService)
+    @service.served_by(ProfileService)
+    @service.served_by(AspectService)
+    def register(self, account_data):
+        logger.info("Received valid data to create account: %s" % account_data)
+        db_session = self.get_data_source(
+            'diaspora').session
+        created_utc = datetime.utcnow()
+        user = self.user_service.create(account_data,
+                                        created_utc=created_utc,
+                                        db_session=db_session)
+        db_session.commit()
+        person_data = {}
+        person_data['user'] = user
+        person_data['pod'] = account_data['pod']
+        person = self.person_service.create(
+            person_data, created_utc=created_utc, db_session=db_session)
+        db_session.commit()
+        profile_data = {}
+        profile_data['person'] = person
+        profile = self.profile_service.create(
+            profile_data, created_utc=created_utc, db_session=db_session)
+        db_session.commit()
+
+        aspects = ["Acquaintances", "Work", "Friends", "Family"]
+        order_id = 4
+        for aspect in aspects:
+            aspect_data = {}
+            aspect_data['user'] = user
+            aspect_data['name'] = aspect
+            aspect_data['order_id'] = order_id
+            order_id -= 1
+            self.aspect_service.create(aspect_data, db_session=db_session)
+            db_session.commit()
+
+        db_session.close()
+        return user
+
+    @service.served_by(UserService)
+    def is_login_valid(self, login_data):
+        db_session = self.get_data_source(
+            'diasporapy').get_connection()['session']
+        user = self.user_service.get_by_user_name(
+            login_data['username'], db_session)
+        if user:
+            if self.user_service.is_password_valid(
+                    login_data['password'], user.encrypted_password):
+                return user
         return False

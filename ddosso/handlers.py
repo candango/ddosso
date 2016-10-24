@@ -46,11 +46,9 @@ def only_ajax(method):
         if "X-Requested-With" in self.request.headers:
             if self.request.headers['X-Requested-With'] == "XMLHttpRequest":
                 return method(self, *args, **kwargs)
-
         else:
             self.set_status(403)
             self.write("This is an XMLHttpRequest request only.")
-
     return wrapper
 
 
@@ -60,7 +58,9 @@ class RootedHandlerMixin:
         root = self.component.conf['root']
         return rooted_path(root, path)
 
+
 class GoogleHandlerMixin:
+
     SESSION_KEY = 'google_user'
 
     def get_current_user(self):
@@ -76,7 +76,19 @@ class IndexHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
         self.redirect(self.get_rooted_path("/sign_in"), permanent=True)
 
 
-class SgninHandler(firenado.tornadoweb.TornadoHandler):
+class ProfileHandler(firenado.tornadoweb.TornadoHandler):
+
+    def get(self):
+        errors = None
+        if self.session.has('errors'):
+            errors = self.session.get('errors')
+            self.session.delete('errors')
+        ddosso_logo = self.component.conf['logo']
+        self.render("profile.html", ddosso_conf=self.component.conf,
+                    ddosso_logo=ddosso_logo, errors=errors)
+
+
+class SigninHandler(firenado.tornadoweb.TornadoHandler):
 
     def get(self):
         errors = None
@@ -88,6 +100,26 @@ class SgninHandler(firenado.tornadoweb.TornadoHandler):
                     ddosso_logo=ddosso_logo, errors=errors)
 
 
+class SignupSocialHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+
+    @only_ajax
+    def post(self):
+        conf = self.component.conf['social']
+        social_data = {
+            'authenticated': False,
+            'type': None,
+            'facebook': {'enabled': conf['facebook']['enabled']},
+            'google': {'enabled': conf['google']['enabled']},
+            'twitter': {'enabled': conf['twitter']['enabled']}
+        }
+        if conf['google']['enabled']:
+            if self.session.has("google_user"):
+                print(self.session.get("google_user"))
+                social_data['authenticated'] = True
+                social_data['type'] = "google"
+        self.write(social_data)
+
+
 class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
 
     def get(self):
@@ -96,17 +128,26 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             errors = self.session.get('errors')
             self.session.delete('errors')
         ddosso_logo = self.component.conf['logo']
+        self.session.set("next_url", self.get_rooted_path("sign_up"))
         self.render("sign_up.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors)
 
+    @service.served_by("ddosso.services.AccountService")
     def post(self):
         error_data = {'errors': {}}
         form = SignupForm(self.request.arguments, handler=self)
         if form.validate():
             self.set_status(200)
-            data = {'id': "abcd1234",
-                    'next_url': self.get_rooted_path("profile")}
-            self.write(data)
+            account_data = form.data
+            # Getting real ip from the nginx
+            x_real_ip = self.request.headers.get("X-Real-IP")
+            account_data['remote_ip'] = x_real_ip or self.request.remote_ip
+            account_data['pod'] = self.component.conf[
+                'diaspora']['url'].split("//")[1]
+            user = self.account_service.register(account_data)
+            #data = {'id': "abcd1234",
+                    #'next_url': self.get_rooted_path("profile")}
+            #self.write(data)
         else:
             self.set_status(403)
             error_data['errors'].update(form.errors)
@@ -132,7 +173,6 @@ class GoogleSignupHandler(GoogleHandlerMixin,
         self.render("google_signup.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors,
                     google_user=self.current_user)
-        print(self.current_user)
 
 
 class GoogleLoginHandler(GoogleHandlerMixin,
@@ -155,6 +195,7 @@ class GoogleLoginHandler(GoogleHandlerMixin,
             access = yield self.get_authenticated_user(
                 redirect_uri=my_redirect_url,
                 code=self.get_argument('code'))
+            print(access)
             user = yield self.oauth2_request(
                 "https://www.googleapis.com/oauth2/v1/userinfo",
                 access_token=access["access_token"])
@@ -163,8 +204,8 @@ class GoogleLoginHandler(GoogleHandlerMixin,
             self.session.set(self.SESSION_KEY, tornado.escape.json_encode(
                 user))
 
-            self.redirect(self.get_argument('next', self.get_rooted_path(
-                "google/sign_up")))
+            self.redirect(self.get_argument('next',
+                                            self.session.get("next_url")))
         else:
             print(self.session.get('next_url'))
             yield self.authorize_redirect(
@@ -273,7 +314,7 @@ class LoginHandler(firenado.tornadoweb.TornadoHandler):
 class CaptchaHandler(firenado.tornadoweb.TornadoHandler):
 
     @only_ajax
-    def get(self, name):
+    def post(self, name):
         import base64
         data = {
             "id": name,

@@ -41,19 +41,19 @@
                 <div class="form-group {{#hasCaptchaError}}has-error{{/hasCaptchaError}}">
                     <div class="col-sm-4 text-center">
                         <img src="{{{captchaData}}}">
-                        <a id="refresh_captcha" class="link-register" class="link-register">Nova Imagem</a>
+                        <a id="refresh_captcha" href="javascript:void(0)" class="link-register" class="link-register">Nova Imagem</a>
                     </div>
                     <div class="col-sm-8">
                         <input name="captcha" id="signup_captcha" type="text" class="form-control" placeholder="Infome o valor da imagem.">
                         {{#hasCaptchaError}}
-                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{captchaError}}}</span>
+                        <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{ captchaError }}}</span>
                         {{/hasCaptchaError}}
                     </div>
                 </div>
                 <div class="form-group form-btns">
                     <div class="col-sm-offset-2 col-sm-10">
                         <button id="login_button" class="btn btn-login">Criar Nova Conta</button>
-                        <a class="link-register" class="link-register">Entrar com uma conta existente</a>
+                        <a class="link-register" href="javascript:void(0)" class="link-register">Entrar com uma conta existente</a>
                     </div>
                 </div>
             </form>

@@ -2,8 +2,11 @@ $(document).ready(function () {
     var location_root = document.location.pathname.replace("sign_up", "");
 
     SignupModel = can.Model.extend({
-        findOne: "GET " + location_root + "captcha/{id}",
+        findOne: "POST " + location_root + "captcha/{id}",
         create : "POST " + location_root + "sign_up"
+    },{});
+    SocialModel = can.Model.extend({
+        findOne: "POST " + location_root + "sign_up/social",
     },{});
 
     can.Component.extend({
@@ -29,8 +32,18 @@ $(document).ready(function () {
             signup: new SignupModel(),
             refreshCaptcha: function() {
                 var viewModel = this;
-                SignupModel.findOne({id: "sign_up"}, function(response) {
+                var values = {id: "sign_up"}
+                values._xsrf = get_xsrf();
+                SignupModel.findOne(values, function(response) {
                     viewModel.attr("captchaData", response.captcha);
+                });
+            },
+            updateSocial: function() {
+                var viewModel = this;
+                var values = {}
+                values._xsrf = get_xsrf();
+                SocialModel.findOne(values, function(response) {
+                    console.debug(response);
                 });
             },
             processLogin: function(login) {
@@ -77,6 +90,7 @@ $(document).ready(function () {
         events: {
             "inserted": function () {
                 this.viewModel.refreshCaptcha();
+                this.viewModel.updateSocial();
             },
             "#login_button click": function() {
                 //this.viewModel.attr('error', false);
