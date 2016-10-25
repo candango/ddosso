@@ -17,7 +17,7 @@
 # See: http://bit.ly/2cj7IRS
 
 from . import discourse
-from .forms import SignupForm
+from .forms import SigninForm, SignupForm
 from .util import captcha_data, rooted_path
 import base64
 
@@ -99,6 +99,26 @@ class SigninHandler(firenado.tornadoweb.TornadoHandler):
         self.render("sign_in.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors)
 
+    @service.served_by("ddosso.services.AccountService")
+    def post(self):
+        error_data = {'errors': {}}
+        form = SigninForm(self.request.arguments, handler=self)
+        if form.validate():
+            self.set_status(200)
+            account_data = form.data
+            # Getting real ip from the nginx
+            x_real_ip = self.request.headers.get("X-Real-IP")
+            account_data['remote_ip'] = x_real_ip or self.request.remote_ip
+            account_data['pod'] = self.component.conf[
+                'diaspora']['url'].split("//")[1]
+            #user = self.account_service.register(account_data)
+            # data = {'id': "abcd1234",
+            # 'next_url': self.get_rooted_path("profile")}
+            # self.write(data)
+        else:
+            self.set_status(403)
+            error_data['errors'].update(form.errors)
+            self.write(error_data)
 
 class SignupSocialHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
 

@@ -167,7 +167,8 @@ class PersonService(service.FirenadoService):
         # TODO: It looks like the guid should be generated based on a random
         # string. This generation based on the timestamp is not correct and
         # should be fixed.
-        person.guid = str(uuid.uuid5(uuid.NAMESPACE_URL, str(created_utc)))
+        person.guid = str(uuid.uuid5(
+            uuid.NAMESPACE_URL, str(created_utc))).replace("-", "")
         person.diaspora_handle = "%s@%s" % (person_data['user'].username,
                                             person_data['pod'])
         person.serialized_public_key = generate_public_key(
@@ -245,9 +246,6 @@ class ProfileService(service.FirenadoService):
 
         profile.first_name = first_name
         profile.last_name = last_name
-        profile.image_url = ''
-        profile.image_url_small = ''
-        profile.image_url_medium = ''
         profile.birthday = None
         profile.gender = ''
         profile.bio = ''
