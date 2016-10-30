@@ -25,6 +25,7 @@ from firenado import service
 
 import logging
 import pika
+import tornado.escape
 from tornado import gen
 import uuid
 
@@ -119,6 +120,7 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
         super(SignupHandler, self).__init__(application, request, **kwargs)
         self.callback_queue = None
         self.condition = Condition()
+        self.account_data = None
         self.response = None
         self.corr_id = str(uuid.uuid4())
         self.in_channel = self.application.get_app_component().rabbitmq[
@@ -134,18 +136,24 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
         self.render("sign_up.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors)
 
+    @gen.coroutine
     @service.served_by("ddosso.services.AccountService")
     def post(self):
         error_data = {'errors': {}}
         form = SignupForm(self.request.arguments, handler=self)
         if form.validate():
             self.set_status(200)
-            account_data = form.data
+            self.account_data = form.data
             # Getting real ip from the nginx
             x_real_ip = self.request.headers.get("X-Real-IP")
-            account_data['remote_ip'] = x_real_ip or self.request.remote_ip
-            account_data['pod'] = self.component.conf[
+            self.account_data['remote_ip'] = x_real_ip or self.request.remote_ip
+            self.account_data['pod'] = self.component.conf[
                 'diaspora']['url'].split("//")[1]
+            self.in_channel.queue_declare(
+                exclusive=True, callback=self.on_request_queue_declared)
+            yield self.condition.wait()
+            print(self.account_data['private_key'])
+
             #user = self.account_service.register(account_data)
             #data = {'id': "abcd1234",
                     #'next_url': self.get_rooted_path("profile")}
@@ -154,6 +162,38 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             self.set_status(403)
             error_data['errors'].update(form.errors)
             self.write(error_data)
+
+    def on_request_queue_declared(self, response):
+        import copy
+        account_data = copy.copy(self.account_data)
+        account_data['password'] = "*" * len(account_data['password'])
+        account_data['passwordConf'] = account_data['password']
+        logger.info("Request temporary queue declared to generate private key "
+                    "for account %s." % account_data)
+        self.callback_queue = response.method.queue
+        self.in_channel.basic_consume(self.on_response, no_ack=True,
+                                      queue=self.callback_queue)
+        self.in_channel.basic_publish(
+            exchange='',
+            routing_key='ddosso_keygen_rpc_queue',
+            properties=pika.BasicProperties(
+                reply_to=self.callback_queue,
+                correlation_id=self.corr_id,
+            ),
+            body=tornado.escape.json_encode(account_data))
+
+    def on_response(self, ch, method, props, body):
+        if self.corr_id == props.correlation_id:
+            import copy
+            import base64
+            account_data = copy.copy(self.account_data)
+            account_data['password'] = "*" * len(account_data['password'])
+            account_data['passwordConf'] = account_data['password']
+            logger.info("Received private key for account %s." % account_data)
+            self.account_data['private_key'] = base64.b64decode(
+                body).decode('ascii')
+            self.in_channel.queue_delete(queue=self.callback_queue)
+            self.condition.notify()
 
 
 class CaptchaHandler(firenado.tornadoweb.TornadoHandler):

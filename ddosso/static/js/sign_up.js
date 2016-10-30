@@ -6,7 +6,7 @@ $(document).ready(function () {
         create : "POST " + location_root + "sign_up"
     },{});
     SocialModel = can.Model.extend({
-        findOne: "POST " + location_root + "sign_up/social",
+        findOne: "POST " + location_root + "sign_up/social"
     },{});
 
     can.Component.extend({
@@ -124,6 +124,9 @@ $(document).ready(function () {
             },
             "#refresh_captcha click": function(event) {
                 this.viewModel.refreshCaptcha();
+            },
+            "#signinLink click": function(event) {
+                window.document.location = location_root + "sign_in";
             },
             "#login_form submit": function(event) {
                 return false;

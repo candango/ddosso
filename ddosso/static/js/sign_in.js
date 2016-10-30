@@ -77,6 +77,9 @@ $(document).ready(function () {
             },
             "#signinForm submit": function(event) {
                 return false;
+            },
+            "#signupLink click": function(event) {
+                window.document.location = location_root + "sign_up";
             }
         }
     });

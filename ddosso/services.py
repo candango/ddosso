@@ -53,7 +53,6 @@ class UserService(service.FirenadoService):
         return user
 
     def create(self, user_data, created_utc=None, db_session=None):
-        from .util import generate_private_key
         from firenado.util import random_string
         if not created_utc:
             created_utc = datetime.utcnow()
@@ -63,7 +62,7 @@ class UserService(service.FirenadoService):
         user = UserBase()
         user.username = user_data['username']
         # TODO: Generate the serialized private key
-        user.serialized_private_key = generate_private_key()
+        user.serialized_private_key = user_data['private_key']
         user.getting_started = True
         user.disable_mail = False
         # TODO: Handle language

@@ -1,6 +1,6 @@
-[program:ddosso-workers]
-process_name=ddosso-workers
-command={path_to_the_venv}/bin/python workers.py
+[program:ddosso-keygen]
+process_name=%(program_name)s_%(process_num)02d
+command={path_to_the_venv}/bin/python workers/keygen.py
 environment=PYTHONPATH="{ddosso_path}"
 user=diaspora
 group=diaspora
@@ -10,7 +10,7 @@ group=diaspora
 # ddosso_path is {parent_pat}/ddosso/ddosso or the dir parent of the conf
 directory = {ddosso_path}
 
-#numprocs=1
+numprocs=5
 stdout_logfile={ddosso_log_path}/ddosso_workers_stdout.log
 stderr_logfile={ddosso_log_path}/ddosso_workers_stderr.log
 #autostart=true

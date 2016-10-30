@@ -99,7 +99,8 @@ rabbitmq.yml
 
 # Supervisord
 ddosso.supervisord.ini
-ddosso.workers.supervisord.ini
+ddosso.fast.tasks.worker.supervisord.ini
+ddosso.keygen.worker.supervisord.ini
 
 # PyCharm
 .idea

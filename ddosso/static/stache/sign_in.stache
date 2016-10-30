@@ -28,7 +28,7 @@
                 <div class="form-group form-btns">
                     <div class="col-sm-offset-2 col-sm-10">
                         <button id="signinButton" class="btn btn-login" type="submit">Entrar</button>
-                        <a href="" target="_blank" class="link-register">Criar uma conta</a>
+                        <a id="signupLink" href="javascript:void(0)" target="_blank" class="link-register">Criar uma conta</a>
                     </div>
                 </div>
             </form>

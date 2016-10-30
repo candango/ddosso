@@ -9,6 +9,12 @@ app:
   cookie_secret: "--a-secret--here--"
   xsrf_cookies: true
   port: 8016
+  login:
+    urls:
+      - name: default
+        value: login
+      - name: google
+        value: {ddosso_root}/google/oauth2callback
 
 data:
   sources:
@@ -25,6 +31,12 @@ components:
   - id: ddosso
     class: ddosso.app.DDOSSOComponent
     enabled: true
+  - id: discourse
+    class: ddosso.components.DiscourseComponent
+    enabled: true
+  - id: google
+    class: ddosso.components.GoogleComponent
+    enabled: true
   - id: static_maps
     enabled: true
   #- id: admin
@@ -33,7 +45,7 @@ components:
   #  enabled: true
 
 log:
-  level: WARNING
+  level: INFO
 
 # Session types could be:
 # file or redis.

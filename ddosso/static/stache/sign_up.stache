@@ -53,7 +53,7 @@
                 <div class="form-group form-btns">
                     <div class="col-sm-offset-2 col-sm-10">
                         <button id="login_button" class="btn btn-login">Criar Nova Conta</button>
-                        <a class="link-register" href="javascript:void(0)" class="link-register">Entrar com uma conta existente</a>
+                        <a id="signinLink" class="link-register" href="javascript:void(0)" class="link-register">Entrar com uma conta existente</a>
                     </div>
                 </div>
             </form>
