@@ -23,7 +23,7 @@ from wtforms_tornado import Form
 
 FORM_PASSWORD_MISSING = "Informe uma senha."
 FORM_USERNAME_MISSING = "Informe o nome do usuário."
-
+FORM_USER_OR_PASSWORD_INVALID = "Usuário ou senha inválidos."
 
 SIGNUP_FORM_CAPTCHA_MISSING = ("Informe o valor da imagem.")
 SIGNUP_FORM_CAPTCHA_NOT_MATCH = ("O valor informado não é igual o da imagem.")
@@ -41,6 +41,7 @@ class SigninForm(Form):
 
     password = PasswordField(validators=[DataRequired(FORM_PASSWORD_MISSING)])
     username = StringField(validators=[DataRequired(FORM_USERNAME_MISSING)])
+    form = StringField()
 
     def __init__(self, formdata=None, obj=None, prefix='', locale_code='en_US',
                  handler=None,
@@ -48,6 +49,20 @@ class SigninForm(Form):
         super(SigninForm, self).__init__(formdata, obj, prefix, **kwargs)
         self.handler = handler
 
+    @service.served_by("ddosso.services.UserService")
+    def validate_form(self, field):
+        if self.username.data and self.password.data:
+            user = self.user_service.by_username(self.username.data.lower())
+            if user is None:
+                raise ValidationError(FORM_USER_OR_PASSWORD_INVALID)
+            if not self.user_service.is_password_valid(
+                    self.password.data, user.encrypted_password):
+                raise ValidationError(FORM_USER_OR_PASSWORD_INVALID)
+
+    def get_data_connected(self):
+        if self.handler:
+            return self.handler.application
+        return None
 
 
 class SignupForm(Form):

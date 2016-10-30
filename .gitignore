@@ -95,6 +95,7 @@ ENV/
 firenado.yml
 ddosso.yml
 static_maps.yml
+rabbitmq.yml
 
 # Supervisord
 firenado.ddosso.supervisord.ini

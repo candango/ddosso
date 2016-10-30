@@ -14,19 +14,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-def captcha_data(handler, name):
+import functools
+
+
+def only_ajax(method):
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        if "X-Requested-With" in self.request.headers:
+            if self.request.headers['X-Requested-With'] == "XMLHttpRequest":
+                return method(self, *args, **kwargs)
+        else:
+            self.set_status(403)
+            self.write("This is an XMLHttpRequest request only.")
+    return wrapper
+
+
+def captcha_data(string):
+    import base64
     from captcha.image import ImageCaptcha
-    from PIL import Image
-    from firenado.util import random_string
     image = ImageCaptcha(fonts=[
         "/usr/share/fonts/dejavu/DejaVuSans.ttf",
         "/usr/share/fonts/liberation/LiberationSerif-Regular.ttf"]
     )
-    string = random_string(5).lower()
-    anti_cache = random_string(22)
-    handler.session.set("captcha_string_%s" % name, string)
     data = image.generate(string)
-    return data.getvalue()
+    return base64.b64encode(data.getvalue()).decode()
 
 
 def rooted_path(root, path):

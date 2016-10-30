@@ -5,14 +5,14 @@ $(document).ready(function () {
         create : "POST " + location_root + "sign_in"
     },{});
     SocialModel = can.Model.extend({
-        findOne: "POST " + location_root + "sign_up/social",
+        findOne: "POST " + location_root + "sign_up/social"
     },{});
 
     can.Component.extend({
         tag: "sign-in-form",
         template: can.view("#sign_in_form"),
         viewModel:{
-            error: false,
+            hasError: false,
             postContainerFocus: false,
             errorMessage: "",
             hasPasswordError: false,
@@ -23,7 +23,7 @@ $(document).ready(function () {
             signin: new SigninModel(),
             updateSocial: function() {
                 var viewModel = this;
-                var values = {}
+                var values = {};
                 values._xsrf = get_xsrf();
                 SocialModel.findOne(values, function(response) {
                     console.debug(response);
@@ -43,16 +43,10 @@ $(document).ready(function () {
                     this.viewModel.attr("hasUsernameError", true);
                     this.viewModel.attr("usernameError", errors.username);
                 }
-                var errors = new can.Map(response.responseJSON.errors);
-                errors.each(
-                    function(element, index, list) {
-                        if(!this.viewModel.attr('error')){
-                            this.viewModel.attr('error', true);
-                        }
-                        errorMessage += element[0] + '<br>';
-                    }.bind(this)
-                );
-                this.viewModel.attr('errorMessage', errorMessage);
+                if(errors.hasOwnProperty('form')) {
+                    this.viewModel.attr("hasError", true);
+                    this.viewModel.attr("errorMessage", errors.form);
+                }
             }
         },
         events: {

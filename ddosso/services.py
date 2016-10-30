@@ -118,7 +118,6 @@ class UserService(service.FirenadoService):
         logger.info("Created user: %s" % user)
         return user
 
-
     def is_password_valid(self, challenge, encrypted_password):
         return bcrypt.verify(
             self.get_peppered_password(challenge), encrypted_password)

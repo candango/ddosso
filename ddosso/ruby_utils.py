@@ -20,4 +20,3 @@ class RailsCookieDecryptor(object):
         cipher = AES.new(self.secret[:32], AES.MODE_CBC, iv)
         plaintext = unpad(cipher.decrypt(encrypted_data))
         return ujson.loads(plaintext)
-
