@@ -1,0 +1,20 @@
+[program:ddosso-workers]
+process_name=ddosso-workers
+command={path_to_the_venv}/bin/python workers.py
+environment=PYTHONPATH="{ddosso_path}"
+user=diaspora
+group=diaspora
+#killasgroup=true
+#startsecs=5
+#stopwaitsecs=10
+# ddosso_path is {parent_pat}/ddosso/ddosso or the dir parent of the conf
+directory = {ddosso_path}
+
+#numprocs=1
+stdout_logfile={ddosso_log_path}/ddosso_workers_stdout.log
+stderr_logfile={ddosso_log_path}/ddosso_workers_stderr.log
+#autostart=true
+#autorestart=true
+#startsecs=10
+#stopwaitsecs=5ent = yes
+

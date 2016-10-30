@@ -1,5 +1,5 @@
-[program:ddosso-firenado]
-process_name=ddosso-firenado
+[program:ddosso]
+process_name=ddosso
 command={path_to_the_venv}/venv/bin/firenado app run
 environment=PYTHONPATH="{ddosso_path}"
 user=diaspora
@@ -11,9 +11,10 @@ group=diaspora
 directory = {ddosso_path}
 
 #numprocs=1
-stdout_logfile={ddosso_log_path}/ddosso_firenado_stdout.log
-stderr_logfile={ddosso_log_path}/ddosso_firenado_stderr.log
+stdout_logfile={ddosso_log_path}/ddosso_stdout.log
+stderr_logfile={ddosso_log_path}/ddosso_stderr.log
 #autostart=true
 #autorestart=true
 #startsecs=10
 #stopwaitsecs=5ent = yes
+

@@ -98,7 +98,8 @@ static_maps.yml
 rabbitmq.yml
 
 # Supervisord
-firenado.ddosso.supervisord.ini
+ddosso.supervisord.ini
+ddosso.workers.supervisord.ini
 
 # PyCharm
 .idea
