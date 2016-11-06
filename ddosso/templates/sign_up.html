@@ -2,6 +2,7 @@
 
 {% block content %}
     {% raw modules.EmbedStache("sign_up_form", "sign_up.stache") %}
+    {% raw modules.EmbedStache("socialControlsStache", "social.stache") %}
     <div class="container">
         <div class="login-logo text-center">
             <img src="{{ ddosso_logo }}">
@@ -16,7 +17,7 @@
             </div>
             {% include "sign_up_errors.html" %}
             <div class="box-body">
-                {% include "social.html" %}
+                <div id="socialControls" class="section-social-buttons"></div>
                 <div id="ddosso_sign_up_form" class="section-form"></div>
             </div>
         </div>
@@ -24,5 +25,10 @@
 {% end %}
 
 {% block page_js_files %}
+<script type="application/javascript">
+var location_root = document.location.pathname.replace("sign_up", "");
+</script>
+
+<script src="{{ modules.RootedPath("/static/js/social.js") }}"></script>
 <script src="{{ modules.RootedPath("/static/js/sign_up.js") }}"></script>
 {% end %}

@@ -1,12 +1,7 @@
 $(document).ready(function () {
-    var location_root = document.location.pathname.replace("sign_up", "");
-
-    SignupModel = can.Model.extend({
+    var SignupModel = can.Model.extend({
         findOne: "POST " + location_root + "captcha/{id}",
         create : "POST " + location_root + "sign_up"
-    },{});
-    SocialModel = can.Model.extend({
-        findOne: "POST " + location_root + "sign_up/social"
     },{});
 
     can.Component.extend({
@@ -15,6 +10,7 @@ $(document).ready(function () {
         viewModel:{
             captchaData: "",
             error: false,
+            isProcessing: false,
             CAPTCHA_IS_EMPTY: "Informe o valor da imagem.",
             postContainerFocus: false,
             errorMessage: "",
@@ -32,24 +28,18 @@ $(document).ready(function () {
             signup: new SignupModel(),
             refreshCaptcha: function() {
                 var viewModel = this;
-                var values = {id: "sign_up"}
+                var values = {id: "sign_up"};
                 values._xsrf = get_xsrf();
                 SignupModel.findOne(values, function(response) {
                     viewModel.attr("captchaData", response.captcha);
-                });
-            },
-            updateSocial: function() {
-                var viewModel = this;
-                var values = {}
-                values._xsrf = get_xsrf();
-                SocialModel.findOne(values, function(response) {
-                    console.debug(response);
                 });
             },
             processLogin: function(login) {
                 window.location = login.next_url;
             },
             processLoginError: function(response) {
+                $("#signupFieldset").attr("disabled", false);
+                this.viewModel.attr("isProcessing", false);
                 $("#signup_captcha").val("")
                 var errors = response.responseJSON.errors;
                 var errorMessage = '';
@@ -90,7 +80,6 @@ $(document).ready(function () {
         events: {
             "inserted": function () {
                 this.viewModel.refreshCaptcha();
-                this.viewModel.updateSocial();
             },
             "#login_button click": function() {
                 //this.viewModel.attr('error', false);
@@ -98,11 +87,14 @@ $(document).ready(function () {
                 this.viewModel.attr("hasCaptchaError", false);
                 this.viewModel.attr("captchaError", "");
 
+
                 if(!($("#signup_captcha").val())){
                     this.viewModel.attr("hasCaptchaError", true);
                     this.viewModel.attr("captchaError",
                         this.viewModel.attr("CAPTCHA_IS_EMPTY"));
                 } else {
+                    this.viewModel.attr("isProcessing", false);
+                    $("#signupFieldset").attr("disabled", false);
                     this.viewModel.attr("hasEmailError", false);
                     this.viewModel.attr("hasPasswordError", false);
                     this.viewModel.attr("hasPasswordConfError", false);
@@ -120,6 +112,8 @@ $(document).ready(function () {
                         this.viewModel.processLogin.bind(this),
                         this.viewModel.processLoginError.bind(this)
                     );
+                    $("#signupFieldset").attr("disabled", true);
+                    this.viewModel.attr("isProcessing", true);
                 }
             },
             "#refresh_captcha click": function(event) {
@@ -134,5 +128,6 @@ $(document).ready(function () {
         }
     });
 
-    $("#ddosso_sign_up_form").html(can.stache("<sign-up-form></sign-up-form>")());
+    $("#ddosso_sign_up_form").html(
+        can.stache("<sign-up-form></sign-up-form>")());
 });

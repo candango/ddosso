@@ -975,22 +975,21 @@ Index('idx_users_invitation_token', UserBase.authentication_token,
       postgresql_using='btree')
 
 
-class DddossoUserBase(Base):
+class DddossoSocialLinkBase(Base):
 
-    __tablename__ = 'ddosso_users'
+    __tablename__ = 'ddosso_social_links'
 
     id = Column('id', Integer(), primary_key=True)
-    facebook_handler = Column('facebook_handler', String(255),
-                              DefaultClause(''), nullable=True)
-    facebook_data = Column('facebook_data', Text, nullable=True)
-    gmail_handler = Column('gmail_handler', String(255), DefaultClause(''),
+    user_id = Column('user_id', Integer(),
+                     ForeignKey('users.id', name='fk_services_user_id',
+                                ondelete='CASCADE'),
+                     nullable=False)
+    type = Column('type', String(50), DefaultClause(''), nullable=True)
+    data = Column('data', Text, nullable=True)
+    handler = Column('handler', String(255), DefaultClause(''),
                            nullable=True)
-    gmail_data = Column('gmail_data', Text, nullable=True)
-    twitter_handler = Column('twitter_handler', String(255), DefaultClause(''),
-                             nullable=True)
-    twitter_data = Column('twitter_data', Text, nullable=True)
     created_at = Column('created_at', TIMESTAMP(), nullable=False)
     updated_at = Column('updated_at', TIMESTAMP(), nullable=False)
 
-Index('idx_ddosso_users_facebook_handler', DddossoUserBase.facebook_handler,
+Index("idx_ddosso_social_links_handler", DddossoSocialLinkBase.handler,
       postgresql_using='btree')

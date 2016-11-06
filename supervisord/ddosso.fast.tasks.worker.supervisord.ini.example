@@ -8,7 +8,7 @@ group=diaspora
 #startsecs=5
 #stopwaitsecs=10
 # ddosso_path is {parent_pat}/ddosso/ddosso or the dir parent of the conf
-directory = {ddosso_path}
+directory = {ddosso_path}/ddosso
 
 #numprocs=1
 stdout_logfile={ddosso_log_path}/ddosso_workers_stdout.log

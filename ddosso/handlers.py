@@ -19,7 +19,6 @@
 from .forms import SigninForm, SignupForm
 from .util import only_ajax, rooted_path
 
-import firenado.tornadoweb
 import firenado.security
 from firenado import service
 
@@ -30,6 +29,10 @@ from tornado import gen
 import uuid
 
 logger = logging.getLogger(__name__)
+
+
+GOOGLE_USER = "google_user"
+TWITTER_USER = "twitter_user"
 
 
 class RootedHandlerMixin:
@@ -61,7 +64,7 @@ class SigninHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
 
     def get(self):
         self.session.set("next_url", self.get_rooted_path("sign_in"))
-        print(self.session.get("GOOGLE_ACCESS"))
+
         errors = None
         if self.session.has('errors'):
             errors = self.session.get('errors')
@@ -70,47 +73,36 @@ class SigninHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
         self.render("sign_in.html", ddosso_conf=self.component.conf,
                     ddosso_logo=ddosso_logo, errors=errors)
 
-    @service.served_by("ddosso.services.AccountService")
+    @service.served_by("ddosso.services.UserService")
     def post(self):
         error_data = {'errors': {}}
         form = SigninForm(self.request.arguments, handler=self)
         if form.validate():
-            self.set_status(200)
+            from .ruby_utils import RailsCookie
+            conf = self.component.conf['diaspora']
+            rails_cookie = RailsCookie(conf['cookie']['secret'])
             account_data = form.data
+            user = self.user_service.by_username(account_data['username'])
+            session_data = {
+                'session_id': str(rails_cookie.gen_cookie_id()),
+                'warden.user.user.key': [
+                    [user.id],
+                    user.encrypted_password[:29],
+                ]
+            }
+            self.set_cookie("_diaspora_session", rails_cookie.encrypt(
+                tornado.escape.json_encode(session_data)))
             # Getting real ip from the nginx
             x_real_ip = self.request.headers.get("X-Real-IP")
-            account_data['remote_ip'] = x_real_ip or self.request.remote_ip
-            account_data['pod'] = self.component.conf[
-                'diaspora']['url'].split("//")[1]
-            #user = self.account_service.register(account_data)
-            # data = {'id': "abcd1234",
-            # 'next_url': self.get_rooted_path("profile")}
-            # self.write(data)
+            remote_ip = x_real_ip or self.request.remote_ip
+            self.user_service.set_user_seem(account_data, remote_ip)
+            self.set_status(200)
+            data = {'id': account_data['username'], 'next_url': "/"}
+            self.write(data)
         else:
             self.set_status(403)
             error_data['errors'].update(form.errors)
             self.write(error_data)
-
-
-class SignupSocialHandler(firenado.tornadoweb.TornadoHandler,
-                          RootedHandlerMixin):
-
-    @only_ajax
-    def post(self):
-        conf = self.component.conf['social']
-        social_data = {
-            'authenticated': False,
-            'type': None,
-            'facebook': {'enabled': conf['facebook']['enabled']},
-            'google': {'enabled': conf['google']['enabled']},
-            'twitter': {'enabled': conf['twitter']['enabled']}
-        }
-        if conf['google']['enabled']:
-            if self.session.has("google_user"):
-                print(self.session.get("google_user"))
-                social_data['authenticated'] = True
-                social_data['type'] = "google"
-        self.write(social_data)
 
 
 class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
@@ -144,6 +136,7 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
         if form.validate():
             self.set_status(200)
             self.account_data = form.data
+            self.account_data['social'] = []
             # Getting real ip from the nginx
             x_real_ip = self.request.headers.get("X-Real-IP")
             self.account_data['remote_ip'] = x_real_ip or self.request.remote_ip
@@ -152,12 +145,28 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             self.in_channel.queue_declare(
                 exclusive=True, callback=self.on_request_queue_declared)
             yield self.condition.wait()
-            print(self.account_data['private_key'])
-
-            #user = self.account_service.register(account_data)
-            #data = {'id': "abcd1234",
-                    #'next_url': self.get_rooted_path("profile")}
-            #self.write(data)
+            if self.session.has(GOOGLE_USER):
+                google_user = tornado.escape.json_decode(
+                    self.session.get(GOOGLE_USER))
+                data = {
+                    'type': "Oauth2:Google",
+                    'data': self.session.get(GOOGLE_USER),
+                    'handler': google_user['email'],
+                }
+                self.account_data['social'].append(data)
+            if self.session.has(TWITTER_USER):
+                twitter_user = tornado.escape.json_decode(
+                    self.session.get(TWITTER_USER))
+                data = {
+                    'type': "Oauth:Twitter",
+                    'data': self.session.get(TWITTER_USER),
+                    'handler': twitter_user['username'],
+                }
+                self.account_data['social'].append(data)
+            user = self.account_service.register(self.account_data)
+            data = {'id': self.account_data['username'],
+                    'next_url': self.get_rooted_path("profile")}
+            self.write(data)
         else:
             self.set_status(403)
             error_data['errors'].update(form.errors)
@@ -196,6 +205,63 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             self.condition.notify()
 
 
+class SocialHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+
+    @only_ajax
+    def post(self, name):
+        conf = self.component.conf['social']
+        social_data = {
+            'authenticated': False,
+            'type': None,
+            'picture': None,
+            'first_name': None,
+            'last_name': None,
+            'email': None,
+            'facebook': {'enabled': conf['facebook']['enabled']},
+            'google': {'enabled': conf['google']['enabled']},
+            'twitter': {'enabled': conf['twitter']['enabled']}
+        }
+        if conf['google']['enabled']:
+            if name == "sign_in":
+                self.session.delete(GOOGLE_USER)
+            if self.session.has(GOOGLE_USER):
+                google_user = tornado.escape.json_decode(
+                    self.session.get(GOOGLE_USER))
+                social_data['authenticated'] = True
+                social_data['type'] = "google"
+                social_data['handler'] = google_user['email']
+                social_data['picture'] = google_user['picture']
+                social_data['first_name'] = google_user['given_name']
+                social_data['last_name'] = google_user['family_name']
+        if conf['twitter']['enabled']:
+            if name == "sign_in":
+                self.session.delete(TWITTER_USER)
+            if self.session.has(TWITTER_USER):
+                twitter_user = tornado.escape.json_decode(
+                    self.session.get(TWITTER_USER))
+                social_data['authenticated'] = True
+                social_data['type'] = "twitter"
+                social_data['handler'] = twitter_user['username']
+                social_data['picture'] = twitter_user[
+                    'profile_image_url_https'].replace("_normal", "_400x400")
+                social_data['first_name'] = twitter_user['name']
+                social_data['last_name'] = ""
+        self.write(social_data)
+
+    def delete(self, name):
+        conf = self.component.conf['social']
+        if conf['google']['enabled']:
+            if self.session.has(GOOGLE_USER):
+                self.session.delete(GOOGLE_USER)
+        if conf['twitter']['enabled']:
+            if self.session.has(TWITTER_USER):
+                self.session.delete(TWITTER_USER)
+        social_data = {
+            'deleted': True,
+        }
+        self.write(social_data)
+
+
 class CaptchaHandler(firenado.tornadoweb.TornadoHandler):
 
     def __init__(self, application, request, **kwargs):
@@ -216,7 +282,6 @@ class CaptchaHandler(firenado.tornadoweb.TornadoHandler):
         self.in_channel.queue_declare(exclusive=True,
                                       callback=self.on_request_queue_declared)
         yield self.condition.wait()
-
         self.write(self.response)
 
     @gen.coroutine

@@ -1,5 +1,5 @@
 [program:ddosso-keygen]
-process_name=%(program_name)s_%(process_num)02d
+process_name=%(process_num)02d
 command={path_to_the_venv}/bin/python workers/keygen.py
 environment=PYTHONPATH="{ddosso_path}"
 user=diaspora
@@ -8,11 +8,11 @@ group=diaspora
 #startsecs=5
 #stopwaitsecs=10
 # ddosso_path is {parent_pat}/ddosso/ddosso or the dir parent of the conf
-directory = {ddosso_path}
+directory = {ddosso_path}/ddosso
 
 numprocs=5
-stdout_logfile={ddosso_log_path}/ddosso_workers_stdout.log
-stderr_logfile={ddosso_log_path}/ddosso_workers_stderr.log
+stdout_logfile={ddosso_log_path}/ddosso_keygen_stdout.log
+stderr_logfile={ddosso_log_path}/ddosso_keygen_stderr.log
 #autostart=true
 #autorestart=true
 #startsecs=10

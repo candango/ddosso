@@ -37,6 +37,8 @@ components:
   - id: google
     class: ddosso.components.GoogleComponent
     enabled: true
+  - id: twitter
+    class: ddosso.components.TwitterComponent
   - id: static_maps
     enabled: true
   #- id: admin

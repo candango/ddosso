@@ -25,7 +25,7 @@ class GoogleComponent(firenado.tornadoweb.TornadoComponent):
     def get_handlers(self):
         root = self.conf['root']
         return [
-            (r"%s" % rooted_path(root, "google/sign_up"),
+            (r"%s" % rooted_path(root, "google/oauth2"),
              handlers.GoogleSignupHandler),
             (r"%s" % rooted_path(root, "google/oauth2callback"),
              handlers.GoogleLoginHandler),

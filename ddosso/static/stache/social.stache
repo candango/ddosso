@@ -1,0 +1,51 @@
+<div class="row">
+    <div class="col-sm-offset-3 col-sm-6">
+        {{#isAuthenticated}}
+            <div class="row text-center">
+                <div class="col-sm-offset-3 col-sm-2">
+                    <img src="{{{socialPicture}}}" alt="" class="img-thumbnail">
+                    <button class="btn btn-block btn-social {{{socialType}}}">
+                        <i class="fa fa-{{{socialImageClass}}}"></i>
+                    </button>
+                </div>
+                <div class="col-sm-4">
+                    <div class="row">
+                        {{#socialFirstName}}
+                        <div>First Name: {{{socialFirstName}}}</div>
+                        {{/socialFirstName}}
+                        {{#socialLastName}}
+                        <div>Last Name: {{{socialLastName}}}</div>
+                        {{/socialLastName}}
+                        <div class="text-center">
+                            <a id="resetOauth"  href="javascript:void(0)" class="link-register">Usar outra rede social</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {{else}}
+            <div class="row">
+                {{#isGoogleEnabled}}
+                <div class="col-sm-6 col-lg-4">
+                    <button id="googleOauth" class="btn btn-block btn-social google">
+                        <i class="fa fa-google-plus"></i> com Google
+                    </button>
+                </div>
+                {{/isGoogleEnabled}}
+                {{#isFacebookEnabled}}
+                <div class="col-sm-6 col-lg-4">
+                    <button class="btn btn-block btn-social facebook">
+                        <i class="fa fa-facebook"></i> com Facebook
+                    </button>
+                </div>
+                {{/isFacebookEnabled}}
+                {{#isTwitterEnabled}}
+                <div class="col-sm-6 col-lg-4">
+                    <button id="twitterOauth" class="btn btn-block btn-social twitter">
+                        <i class="fa fa-twitter"></i> com Twitter
+                    </button>
+                </div>
+                {{/isTwitterEnabled}}
+            </div>
+        {{/isAuthenticated}}
+    </div>
+</div>

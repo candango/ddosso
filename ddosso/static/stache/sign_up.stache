@@ -2,19 +2,23 @@
     <div class="col-sm-offset-3 col-sm-6">
         <div class="login-form">
             <form id="login_form" class="form-horizontal">
-                <div class="form-group {{#hasEmailError}}has-error{{/hasEmailError}}">
-                    <label for="user-email" class="col-sm-2 control-label">E-Mail</label>
+                {{#isProcessing}}
+                    <span class="help-block"></span> Processando...</span>
+                {{/isProcessing}}
+                <fieldset id="signupFieldset">
+                <div class="form-group {{#hasEmailError}}has-error{{/hasEmailError}}" >
+                    <label for="userEmail" class="col-sm-2 control-label">E-Mail</label>
                     <div class="col-sm-10">
-                        <input name="email" id="user-email" type="text" class="form-control" placeholder="Informe seu email" autofocus>
+                        <input name="email" id="userEmail" type="text" class="form-control" placeholder="Informe seu email" autofocus>
                         {{#hasEmailError}}
                         <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{emailError}}}</span>
                         {{/hasEmailError}}
                     </div>
                 </div>
                 <div class="form-group {{#hasUsernameError}}has-error{{/hasUsernameError}}">
-                    <label for="login-user" class="col-sm-2 control-label">Usuário</label>
+                    <label for="username" class="col-sm-2 control-label">Usuário</label>
                     <div class="col-sm-10">
-                        <input name="username" id="login-user" type="text" class="form-control" placeholder="Usuário no TheRealTalk" autofocus>
+                        <input name="username" id="username" type="text" class="form-control" placeholder="Usuário no TheRealTalk" autofocus>
                         {{#hasUsernameError}}
                         <span class="help-block"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span> {{{usernameError}}}</span>
                         {{/hasUsernameError}}
@@ -56,6 +60,7 @@
                         <a id="signinLink" class="link-register" href="javascript:void(0)" class="link-register">Entrar com uma conta existente</a>
                     </div>
                 </div>
+                {{#isProcessing}}</fieldset>{{/isProcessing}}
             </form>
         </div>
     </div>

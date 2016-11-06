@@ -44,8 +44,7 @@ class GoogleSignupHandler(GoogleHandlerMixin,
     def get(self):
         errors = {}
         google_user = self.current_user
-        #if self.user_service.by_email('podmin@therealtalk.org'):
-        if True:
+        if self.user_service.by_email(google_user['email']):
             self.session.delete(self.SESSION_KEY)
             errors['signup'] = ("Este email já está cadastrado no pod. Faça o "
                                 "login e associe sua conta os seu perfil do "
@@ -53,10 +52,7 @@ class GoogleSignupHandler(GoogleHandlerMixin,
             self.session.set("errors", errors)
             self.redirect("%s" % self.component.conf['root'])
         else:
-            ddosso_logo = self.component.conf['logo']
-            self.render("google_signup.html", ddosso_conf=self.component.conf,
-                        ddosso_logo=ddosso_logo, errors=errors,
-                        google_user=self.current_user)
+            self.redirect(self.session.get("next_url"))
 
 
 class GoogleLoginHandler(GoogleHandlerMixin,
@@ -91,10 +87,10 @@ class GoogleLoginHandler(GoogleHandlerMixin,
             self.session.set("GOOGLE_ACCESS", tornado.escape.json_encode(
                 access))
 
-            self.redirect(self.get_argument('next',
-                                            self.session.get("next_url")))
+            self.redirect(
+                self.get_argument('next',
+                                  self.get_rooted_path("google/oauth2")))
         else:
-            print(self.session.get('next_url'))
             yield self.authorize_redirect(
                 redirect_uri=my_redirect_url,
                 client_id=self.component.conf['social']['google']['key'],
