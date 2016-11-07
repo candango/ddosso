@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ddosso.handlers import RootedHandlerMixin
+from ddosso.handlers import DdossoHandlerMixin
 
 import firenado.conf
 import firenado.tornadoweb
@@ -57,7 +57,7 @@ class GoogleSignupHandler(GoogleHandlerMixin,
 
 class GoogleLoginHandler(GoogleHandlerMixin,
                          firenado.tornadoweb.TornadoHandler, GoogleOAuth2Mixin,
-                         RootedHandlerMixin):
+                         DdossoHandlerMixin):
     @gen.coroutine
     def get(self):
         self.settings['google_oauth'] = {}

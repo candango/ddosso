@@ -49,21 +49,17 @@ def rooted_path(root, path):
         return rooted_path
     return rooted_path.rstrip("/")
 
+
 # TODO: Private key methods belong to podship_platform project
 def generate_private_key():
     """ FROM pyraspora: pyaspora.user.models
-            Generate a 4096-bit RSA key. The key will be stored in the User
-            object. The private key will be protected with password <passphrase>,
-            which is usually the user password.
-            """
-    # TODO: I don't know if this is the way diaspora is handling the key
-    # Let's keep this way by now
-    # TODO: looks like this method is candidate to be part of some security
-    # toolkit
+    Generate a 4096-bit RSA key. The key will be stored in the User
+    object. The private key will be protected with password <passphrase>,
+    which is usually the user password.
+    """
+    # TODO: seems to be candidate as part of some security toolkit
     from Crypto.PublicKey import RSA
-
     RSAkey = RSA.generate(4096)
-
     return RSAkey.exportKey(
         format='PEM',
         pkcs=1
@@ -73,6 +69,7 @@ def generate_private_key():
 def load_private_key(private_key_data):
     from Crypto.PublicKey import RSA
     return RSA.importKey(private_key_data)
+
 
 def generate_public_key(private_key_data):
     RSAkey = load_private_key(private_key_data)

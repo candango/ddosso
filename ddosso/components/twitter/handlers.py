@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ddosso.handlers import RootedHandlerMixin
+from ddosso.handlers import DdossoHandlerMixin
 
 import firenado.conf
 import firenado.tornadoweb
@@ -42,7 +42,7 @@ class TwitterHandlerMixin:
 
 class TwitterOauthHandler(TwitterHandlerMixin,
                           firenado.tornadoweb.TornadoHandler,
-                          RootedHandlerMixin):
+                          DdossoHandlerMixin):
 
     @firenado.security.authenticated("twitter")
     @service.served_by("ddosso.services.SocialLinkService")
@@ -67,8 +67,8 @@ class TwitterOauthHandler(TwitterHandlerMixin,
 
 
 class TwitterOauthCallbackHandler(TwitterHandlerMixin,
-                         firenado.tornadoweb.TornadoHandler, TwitterMixin,
-                         RootedHandlerMixin):
+                                  firenado.tornadoweb.TornadoHandler, TwitterMixin,
+                                  DdossoHandlerMixin):
     @gen.coroutine
     @service.served_by("ddosso.services.SocialLinkService")
     def get(self):

@@ -30,19 +30,40 @@ import uuid
 
 logger = logging.getLogger(__name__)
 
-
+DIASPORA_SESSION_COOKIE = "_diaspora_session"
 GOOGLE_USER = "google_user"
 TWITTER_USER = "twitter_user"
 
 
-class RootedHandlerMixin:
+class DdossoHandlerMixin:
+
+    @service.served_by("ddosso.services.UserService")
+    def is_logged(self):
+        from .ruby_utils import RailsCookie
+        conf = self.component.conf['diaspora']
+        rails_cookie = RailsCookie(conf['cookie']['secret'])
+        cookie = self.get_cookie(DIASPORA_SESSION_COOKIE, None)
+        if cookie:
+            if rails_cookie.is_valid(cookie):
+                cookie_data = rails_cookie.decrypt(cookie).decode()
+                rails_session = tornado.escape.json_decode(cookie_data)
+                if 'warden.user.user.key' in rails_session:
+                    user_id = rails_session['warden.user.user.key'][0][0]
+                    pass_partial = rails_session['warden.user.user.key'][1]
+                    user = self.user_service.by_id(user_id)
+                    if user:
+                        if user.encrypted_password[:29] == pass_partial:
+                            if user.locked_at is None:
+                                return True
+            self.clear_cookie(DIASPORA_SESSION_COOKIE)
+        return False
 
     def get_rooted_path(self, path):
         root = self.component.conf['root']
         return rooted_path(root, path)
 
 
-class IndexHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+class IndexHandler(firenado.tornadoweb.TornadoHandler, DdossoHandlerMixin):
 
     def get(self):
         self.redirect(self.get_rooted_path("/sign_in"), permanent=True)
@@ -60,18 +81,21 @@ class ProfileHandler(firenado.tornadoweb.TornadoHandler):
                     ddosso_logo=ddosso_logo, errors=errors)
 
 
-class SigninHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+class SigninHandler(firenado.tornadoweb.TornadoHandler, DdossoHandlerMixin):
 
     def get(self):
-        self.session.set("next_url", self.get_rooted_path("sign_in"))
+        if self.is_logged():
+            self.redirect("/")
+        else:
+            self.session.set("next_url", self.get_rooted_path("sign_in"))
 
-        errors = None
-        if self.session.has('errors'):
-            errors = self.session.get('errors')
-            self.session.delete('errors')
-        ddosso_logo = self.component.conf['logo']
-        self.render("sign_in.html", ddosso_conf=self.component.conf,
-                    ddosso_logo=ddosso_logo, errors=errors)
+            errors = None
+            if self.session.has('errors'):
+                errors = self.session.get('errors')
+                self.session.delete('errors')
+            ddosso_logo = self.component.conf['logo']
+            self.render("sign_in.html", ddosso_conf=self.component.conf,
+                        ddosso_logo=ddosso_logo, errors=errors)
 
     @service.served_by("ddosso.services.UserService")
     def post(self):
@@ -90,7 +114,7 @@ class SigninHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
                     user.encrypted_password[:29],
                 ]
             }
-            self.set_cookie("_diaspora_session", rails_cookie.encrypt(
+            self.set_cookie(DIASPORA_SESSION_COOKIE, rails_cookie.encrypt(
                 tornado.escape.json_encode(session_data)))
             # Getting real ip from the nginx
             x_real_ip = self.request.headers.get("X-Real-IP")
@@ -105,7 +129,7 @@ class SigninHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             self.write(error_data)
 
 
-class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+class SignupHandler(firenado.tornadoweb.TornadoHandler, DdossoHandlerMixin):
 
     def __init__(self, application, request, **kwargs):
         from tornado.locks import Condition
@@ -119,14 +143,17 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             'client'].channels['in']
 
     def get(self):
-        errors = None
-        if self.session.has('errors'):
-            errors = self.session.get('errors')
-            self.session.delete('errors')
-        ddosso_logo = self.component.conf['logo']
-        self.session.set("next_url", self.get_rooted_path("sign_up"))
-        self.render("sign_up.html", ddosso_conf=self.component.conf,
-                    ddosso_logo=ddosso_logo, errors=errors)
+        if self.is_logged():
+            self.redirect("/")
+        else:
+            errors = None
+            if self.session.has('errors'):
+                errors = self.session.get('errors')
+                self.session.delete('errors')
+            ddosso_logo = self.component.conf['logo']
+            self.session.set("next_url", self.get_rooted_path("sign_up"))
+            self.render("sign_up.html", ddosso_conf=self.component.conf,
+                        ddosso_logo=ddosso_logo, errors=errors)
 
     @gen.coroutine
     @service.served_by("ddosso.services.AccountService")
@@ -164,8 +191,7 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
                 }
                 self.account_data['social'].append(data)
             user = self.account_service.register(self.account_data)
-            data = {'id': self.account_data['username'],
-                    'next_url': self.get_rooted_path("profile")}
+            data = {'id': self.account_data['username'], 'next_url': "/"}
             self.write(data)
         else:
             self.set_status(403)
@@ -205,7 +231,7 @@ class SignupHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
             self.condition.notify()
 
 
-class SocialHandler(firenado.tornadoweb.TornadoHandler, RootedHandlerMixin):
+class SocialHandler(firenado.tornadoweb.TornadoHandler, DdossoHandlerMixin):
 
     @only_ajax
     def post(self, name):

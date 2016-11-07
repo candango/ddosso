@@ -21,8 +21,6 @@ from Crypto.Protocol.KDF import PBKDF2
 from Crypto import Random
 from hashlib import sha1, md5
 import hmac
-import binascii
-from kitchen.text.converters import getwriter, to_bytes, to_unicode
 
 BS = 16
 pad = lambda s: s + (BS - len(s) % BS) * chr(BS - len(s) % BS)
@@ -51,9 +49,19 @@ class RailsCookie(object):
         m.update(Random.new().read(32))
         return m.hexdigest()
 
+    def is_valid(self, cookie):
+        unquoted_cookie = urllib.parse.unquote(cookie)
+        their_signature = unquoted_cookie.split("--")[1].encode()
+        my_signature = self.sign(unquoted_cookie.split("--")[0].encode())
+        return hmac.compare_digest(their_signature, my_signature)
+
+    def sign(self, data):
+        return hmac.new(self.secret_encrypted, data,
+                        digestmod=sha1).hexdigest().encode()
+
     def decrypt(self, cookie):
         first = urllib.parse.unquote(cookie)
-        second = first.split('--')[0]
+        second = first.split("--")[0]
         cookie = base64.b64decode(second)
         encrypted_data, iv = map(base64.b64decode, cookie.decode().split('--'))
         cipher = AES.new(self.secret[:32], AES.MODE_CBC, iv)
@@ -72,7 +80,6 @@ class RailsCookie(object):
         encoded_cookie = base64.b64encode(
             html.escape(encoded_encrypted_message.decode()).encode() +
             separator + iv_base64)
-        hexdigest = hmac.new(self.secret_encrypted, encoded_cookie,
-                             digestmod=sha1).hexdigest().encode()
+        hexdigest = self.sign(encoded_cookie)
         return urllib.parse.quote_from_bytes(encoded_cookie + separator +
                                              hexdigest).encode()
