@@ -58,6 +58,24 @@ class DdossoHandlerMixin:
             self.clear_cookie(DIASPORA_SESSION_COOKIE)
         return False
 
+    @service.served_by("ddosso.services.UserService")
+    def get_logged_user(self):
+        from .ruby_utils import RailsCookie
+        conf = self.component.conf['diaspora']
+        rails_cookie = RailsCookie(conf['cookie']['secret'])
+        cookie = self.get_cookie(DIASPORA_SESSION_COOKIE, None)
+        if cookie:
+            if rails_cookie.is_valid(cookie):
+                cookie_data = rails_cookie.decrypt(cookie).decode()
+                rails_session = tornado.escape.json_decode(cookie_data)
+                if 'warden.user.user.key' in rails_session:
+                    user_id = rails_session['warden.user.user.key'][0][0]
+                    pass_partial = rails_session['warden.user.user.key'][1]
+                    user = self.user_service.by_id(user_id)
+                    if user:
+                        return user
+        return None
+
     def get_rooted_path(self, path):
         root = self.component.conf['root']
         return rooted_path(root, path)

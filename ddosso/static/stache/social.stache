@@ -33,7 +33,7 @@
                 {{/isGoogleEnabled}}
                 {{#isFacebookEnabled}}
                 <div class="col-sm-6 col-lg-4">
-                    <button class="btn btn-block btn-social facebook">
+                    <button id="facebookGraph" class="btn btn-block btn-social facebook">
                         <i class="fa fa-facebook"></i> com Facebook
                     </button>
                 </div>

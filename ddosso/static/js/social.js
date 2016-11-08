@@ -59,6 +59,9 @@ $(document).ready(function () {
                             }
                         }
                     }
+                    if(social.facebook.enabled) {
+                        viewModel.attr("isFacebookEnabled", true);
+                    }
                     if(social.google.enabled) {
                         viewModel.attr("isGoogleEnabled", true);
                     }
@@ -78,6 +81,9 @@ $(document).ready(function () {
             },
             "#googleOauth click": function() {
                 window.document.location = location_root + "google/oauth2";
+            },
+            "#facebookGraph click": function() {
+                window.document.location = location_root + "facebook/authorize";
             },
             "#twitterOauth click": function() {
                 window.document.location = location_root + "twitter/oauth";

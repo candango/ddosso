@@ -15,5 +15,6 @@
 # limitations under the License.
 
 from .discourse.component import DiscourseComponent
+from .facebook.component import FacebookComponent
 from .google.component import GoogleComponent
 from .twitter.component import TwitterComponent
